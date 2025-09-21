@@ -1,0 +1,47 @@
+apiVersion: "datadoghq.com/v2alpha1"
+kind: "DatadogAgent"
+metadata:
+  name: "datadog"
+  namespace: "datadog-operator"
+spec:
+  global:
+    clusterName: "dapr-demo"
+    site: "us5.datadoghq.com"
+    tags:
+      - "env:demo"
+      - "project:k8s-dapr"
+    credentials:
+      apiSecret:
+        secretName: "datadog-secret"
+        keyName: "api-key"
+  features:
+    logCollection:
+      enabled: true
+      containerCollectAll: true
+    apm:
+      enabled: true
+      hostPortConfig:
+        enabled: true
+        hostPort: 8126
+    otlp:
+      receiver:
+        protocols:
+          grpc:
+            enabled: true
+            endpoint: "0.0.0.0:4317"
+          http:
+            enabled: true
+            endpoint: "0.0.0.0:4318"
+    orchestratorExplorer:
+      enabled: true
+  override:
+    nodeAgent:
+      env:
+        - name: DD_KUBELET_TLS_VERIFY
+          value: "false"
+        - name: DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT
+          value: "0.0.0.0:4317"
+        - name: DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT
+          value: "0.0.0.0:4318"
+        - name: DD_APM_IGNORE_RESOURCES
+          value: "GET /health,GET /healthz,GET /healthcheck,health_check,request.*health.*,.*health.*"

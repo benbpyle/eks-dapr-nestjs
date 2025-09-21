@@ -1,0 +1,107 @@
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"datadoghq.com/v2alpha1","kind":"DatadogAgent","metadata":{"annotations":{},"name":"datadog","namespace":"datadog-operator"},"spec":{"features":{"apm":{"enabled":true,"hostPortConfig":{"enabled":true,"hostPort":8126}},"logCollection":{"containerCollectAll":true,"enabled":true},"orchestratorExplorer":{"enabled":true},"otlp":{"receiver":{"protocols":{"grpc":{"enabled":true,"endpoint":"0.0.0.0:4317"},"http":{"enabled":true,"endpoint":"0.0.0.0:4318"}}}}},"global":{"clusterName":"dapr-demo","credentials":{"apiSecret":{"keyName":"api-key","secretName":"datadog-secret"}},"site":"us5.datadoghq.com","tags":["env:demo","project:k8s-dapr"]},"override":{"nodeAgent":{"env":[{"name":"DD_KUBELET_TLS_VERIFY","value":"false"},{"name":"DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT","value":"0.0.0.0:4317"},{"name":"DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT","value":"0.0.0.0:4318"}],"hostNetwork":true}}}}
+  creationTimestamp: "2025-09-11T22:41:51Z"
+  finalizers:
+  - finalizer.agent.datadoghq.com
+  generation: 4
+  name: datadog
+  namespace: datadog-operator
+  resourceVersion: "322935"
+  uid: 7bf18bf9-5a57-40e7-beda-fb43ab1abd76
+spec:
+  features:
+    apm:
+      enabled: true
+      hostPortConfig:
+        enabled: true
+        hostPort: 8126
+    logCollection:
+      containerCollectAll: true
+      enabled: true
+    orchestratorExplorer:
+      enabled: true
+    otlp:
+      receiver:
+        protocols:
+          grpc:
+            enabled: true
+            endpoint: 0.0.0.0:4317
+          http:
+            enabled: true
+            endpoint: 0.0.0.0:4318
+  global:
+    clusterName: dapr-demo
+    credentials:
+      apiSecret:
+        keyName: api-key
+        secretName: datadog-secret
+    site: us5.datadoghq.com
+    tags:
+    - env:demo
+    - project:k8s-dapr
+  override:
+    nodeAgent:
+      env:
+      - name: DD_KUBELET_TLS_VERIFY
+        value: "false"
+      - name: DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_GRPC_ENDPOINT
+        value: 0.0.0.0:4317
+      - name: DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT
+        value: 0.0.0.0:4318
+      hostNetwork: true
+status:
+  agent:
+    available: 2
+    current: 2
+    desired: 2
+    ready: 2
+    state: Running
+    status: Running (2/2/2)
+    upToDate: 2
+  agentList:
+  - available: 2
+    current: 2
+    currentHash: d75e733bdd4c3285fcf47a5bda60efa7
+    daemonsetName: datadog-agent
+    desired: 2
+    lastUpdate: "2025-09-12T16:18:40Z"
+    ready: 2
+    state: Running
+    status: Running (2/2/2)
+    upToDate: 2
+  clusterAgent:
+    availableReplicas: 1
+    currentHash: 5c363633b86e72a8d74231959c53d31d
+    deploymentName: datadog-cluster-agent
+    generatedToken: NeKPduMrhGrSRwbVCiLobSGorHsmGxQW
+    lastUpdate: "2025-09-12T16:18:40Z"
+    readyReplicas: 1
+    replicas: 1
+    state: Running
+    status: Running (1/1/1)
+    updatedReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-09-11T22:41:51Z"
+    message: reconcile succeed
+    reason: reconcile_succeed
+    status: "True"
+    type: ClusterAgentReconcile
+  - lastTransitionTime: "2025-09-11T22:41:51Z"
+    message: reconcile succeed
+    reason: reconcile_succeed
+    status: "True"
+    type: AgentReconcile
+  - lastTransitionTime: "2025-09-11T22:41:51Z"
+    message: Datadog metrics forwarding ok
+    reason: MetricsForwardingSucceeded
+    status: "True"
+    type: ActiveDatadogMetrics
+  - lastTransitionTime: "2025-09-12T16:18:40Z"
+    message: reconcile succeed
+    reason: reconcile_succeed
+    status: "True"
+    type: ClusterChecksRunnerReconcile

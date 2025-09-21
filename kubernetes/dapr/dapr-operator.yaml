@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dapr-system
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: dapr
+  namespace: dapr-system
+spec:
+  chart: dapr
+  repo: https://dapr.github.io/helm-charts/
+  targetNamespace: dapr-system
+  valuesContent: |-
+    global:
+      ha:
+        enabled: false
+    dapr_operator:
+      replicaCount: 1
+    dapr_sidecar_injector:
+      replicaCount: 1
+    dapr_placement:
+      replicaCount: 1
+    dapr_sentry:
+      replicaCount: 1

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comms
+  namespace: dapr-services
+  labels:
+    app: comms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comms
+  template:
+    metadata:
+      labels:
+        app: comms
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "comms"
+        dapr.io/app-port: "8080"
+        dapr.io/config: "dapr-config"
+    spec:
+      containers:
+      - name: comms
+        image: public.ecr.aws/f8u4w2p3/node/comms:v3
+        ports:
+        - containerPort: 8080
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DAPR_HTTP_PORT
+          value: "3500"
+        - name: DAPR_HTTP_HOST
+          value: "localhost"
+        - name: SERVICE_NAME
+          value: "comms"
+        - name: ENVIRONMENT
+          value: "demo"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comms-service
+  namespace: dapr-services
+spec:
+  selector:
+    app: comms
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP

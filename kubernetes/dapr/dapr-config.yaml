@@ -1,0 +1,15 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: dapr-config
+  namespace: dapr-services
+spec:
+  tracing:
+    samplingRate: "1"
+    otel:
+      endpointAddress: "192.168.48.68:4318"
+      isSecure: false
+      protocol: "http"
+  features:
+    - name: "ServiceInvocation"
+      enabled: true

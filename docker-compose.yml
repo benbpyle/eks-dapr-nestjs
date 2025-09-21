@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Redis for Dapr state store
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - dapr-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Dapr placement service
+  dapr-placement:
+    image: daprio/dapr:1.12.0
+    command: ["./placement", "-port", "50006", "-log-level", "debug"]
+    ports:
+      - "50006:50006"
+    networks:
+      - dapr-network
+
+  # Node.js Greeter Service
+  greeter:
+    build:
+      context: ./services/greeter
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - AGENT_ADDRESS=localhost:8126
+      - NODE_ENV=development
+    networks:
+      - dapr-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Dapr sidecar for greeter
+  greeter-dapr:
+    image: daprio/daprd:1.12.0
+    command: [
+      "./daprd",
+      "-app-id", "greeter",
+      "-app-port", "3000",
+      "-placement-host-address", "dapr-placement:50006",
+      "-dapr-http-port", "3501",
+      "-dapr-grpc-port", "50002",
+      "-log-level", "debug",
+      "-components-path", "/components"
+    ]
+    volumes:
+      - "./dapr-components:/components"
+    depends_on:
+      - greeter
+      - dapr-placement
+      - redis
+    networks:
+      - dapr-network
+    ports:
+      - "3501:3501"
+      - "50002:50002"
+
+  # Rust Comms Service
+  comms:
+    build:
+      context: ./services/comms
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - AGENT_ADDRESS=localhost:8126
+      - RUST_LOG=info
+    networks:
+      - dapr-network
+    depends_on:
+      greeter:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Dapr sidecar for comms
+  comms-dapr:
+    image: daprio/daprd:1.12.0
+    command: [
+      "./daprd",
+      "-app-id", "comms",
+      "-app-port", "8080",
+      "-placement-host-address", "dapr-placement:50006",
+      "-dapr-http-port", "3500",
+      "-dapr-grpc-port", "50001",
+      "-log-level", "debug",
+      "-components-path", "/components"
+    ]
+    volumes:
+      - "./dapr-components:/components"
+    depends_on:
+      - comms
+      - dapr-placement
+      - redis
+    networks:
+      - dapr-network
+    ports:
+      - "3500:3500"
+      - "50001:50001"
+
+networks:
+  dapr-network:
+    driver: bridge

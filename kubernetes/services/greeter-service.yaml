@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter
+  namespace: dapr-services
+  labels:
+    app: greeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter
+  template:
+    metadata:
+      labels:
+        app: greeter
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "greeter"
+        dapr.io/app-port: "8080"
+        dapr.io/config: "dapr-config"
+    spec:
+      containers:
+      - name: greeter
+        image: public.ecr.aws/f8u4w2p3/node/greeter:v3
+        ports:
+        - containerPort: 8080
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: SERVICE_NAME
+          value: "greeter"
+        - name: ENVIRONMENT
+          value: "demo"
+        - name: PORT
+          value: "8080"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeter-service
+  namespace: dapr-services
+spec:
+  selector:
+    app: greeter
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP

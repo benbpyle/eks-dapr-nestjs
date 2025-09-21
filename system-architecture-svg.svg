@@ -1,0 +1,147 @@
+<svg viewBox="0 0 1100 700" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define styles -->
+  <defs>
+    <style>
+      .service { fill: #e1f5fe; stroke: #01579b; stroke-width: 2px; }
+      .sidecar { fill: #fff3e0; stroke: #e65100; stroke-width: 2px; }
+      .external { fill: #f3e5f5; stroke: #4a148c; stroke-width: 2px; }
+      .monitoring { fill: #e8f5e9; stroke: #1b5e20; stroke-width: 2px; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .label { font-family: Arial, sans-serif; font-size: 10px; fill: #333; }
+      .arrow { fill: none; stroke: #333; stroke-width: 1.5px; }
+      .arrow-dashed { fill: none; stroke: #666; stroke-width: 1.5px; stroke-dasharray: 5,5; }
+      .k8s-bg { fill: #f0f7ff; stroke: #1976d2; stroke-width: 2px; stroke-dasharray: 8,4; opacity: 0.3; }
+      .aws-bg { fill: #fff8e1; stroke: #ff9800; stroke-width: 2px; stroke-dasharray: 10,5; opacity: 0.2; }
+      .env-label { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #666; }
+      .legend-text { font-family: Arial, sans-serif; font-size: 11px; fill: #333; }
+      .legend-title { font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #333; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <!-- AWS Environment Background -->
+  <rect x="20" y="140" width="900" height="480" rx="10" class="aws-bg"/>
+  <text x="30" y="160" class="env-label">AWS Cloud</text>
+  
+  <!-- Kubernetes Cluster Background -->
+  <rect x="250" y="170" width="520" height="450" rx="8" class="k8s-bg"/>
+  <text x="260" y="190" class="env-label" style="fill: #1976d2;">Kubernetes Cluster (EKS)</text>
+  
+  <!-- Internet/ALB -->
+  <rect x="50" y="250" width="120" height="80" rx="5" class="external"/>
+  <text x="110" y="285" class="text">Internet</text>
+  <text x="110" y="300" class="text">(ALB)</text>
+  
+  <!-- Pod 1 Container -->
+  <g id="pod1">
+    <rect x="280" y="220" width="160" height="240" rx="5" fill="none" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="360" y="210" class="label" style="font-weight: bold;">Pod: comms</text>
+    
+    <!-- NestJS (comms) -->
+    <rect x="300" y="230" width="120" height="80" rx="5" class="service"/>
+    <text x="360" y="265" class="text">NestJS</text>
+    <text x="360" y="280" class="text">(comms)</text>
+    
+    <!-- Dapr Sidecar (comms) -->
+    <rect x="300" y="360" width="120" height="80" rx="5" class="sidecar"/>
+    <text x="360" y="390" class="text">Dapr Sidecar</text>
+    <text x="360" y="405" class="text">(comms)</text>
+  </g>
+  
+  <!-- Pod 2 Container -->
+  <g id="pod2">
+    <rect x="580" y="220" width="160" height="240" rx="5" fill="none" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="660" y="210" class="label" style="font-weight: bold;">Pod: greeter</text>
+    
+    <!-- NestJS (greeter) -->
+    <rect x="600" y="230" width="120" height="80" rx="5" class="service"/>
+    <text x="660" y="265" class="text">NestJS</text>
+    <text x="660" y="280" class="text">(greeter)</text>
+    
+    <!-- Dapr Sidecar (greeter) -->
+    <rect x="600" y="360" width="120" height="80" rx="5" class="sidecar"/>
+    <text x="660" y="390" class="text">Dapr Sidecar</text>
+    <text x="660" y="405" class="text">(greeter)</text>
+  </g>
+  
+  <!-- Datadog Agent (DaemonSet) -->
+  <g id="daemonset">
+    <rect x="430" y="520" width="160" height="90" rx="5" fill="none" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="510" y="510" class="label" style="font-weight: bold;">DaemonSet</text>
+    
+    <rect x="450" y="525" width="120" height="70" rx="5" class="monitoring"/>
+    <text x="510" y="555" class="text">Datadog Agent</text>
+    <text x="510" y="570" class="text">(OTLP)</text>
+  </g>
+  
+  <!-- Arrows -->
+  <!-- Internet to NestJS (comms) -->
+  <path d="M 170 290 L 300 270" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="235" y="270" class="label">HTTP POST /greet</text>
+  <text x="235" y="282" class="label">{"name":"..."}</text>
+  
+  <!-- NestJS (comms) to NestJS (greeter) -->
+  <path d="M 420 270 L 600 270" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="510" y="255" class="label">Dapr SDK</text>
+  <text x="510" y="267" class="label">service call</text>
+  
+  <!-- NestJS (comms) to Dapr Sidecar (comms) -->
+  <path d="M 360 310 L 360 360" class="arrow-dashed" marker-end="url(#arrowhead-dashed)"/>
+  <text x="380" y="335" class="label">monitors</text>
+  
+  <!-- NestJS (greeter) to Dapr Sidecar (greeter) -->
+  <path d="M 660 310 L 660 360" class="arrow-dashed" marker-end="url(#arrowhead-dashed)"/>
+  <text x="680" y="335" class="label">monitors</text>
+  
+  <!-- Dapr Sidecar (comms) to Datadog -->
+  <path d="M 380 440 L 470 525" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="410" y="480" class="label">OTEL traces</text>
+  
+  <!-- Dapr Sidecar (greeter) to Datadog -->
+  <path d="M 640 440 L 550 525" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="610" y="480" class="label">OTEL traces</text>
+  
+  <!-- Legend -->
+  <g id="legend" transform="translate(950, 200)">
+    <rect x="0" y="0" width="140" height="320" fill="white" stroke="#999" stroke-width="1" rx="5"/>
+    <text x="70" y="20" class="legend-title">Legend</text>
+    
+    <!-- Component Types -->
+    <text x="10" y="45" class="legend-title" style="font-size: 11px;">Components:</text>
+    
+    <rect x="10" y="55" width="30" height="20" rx="3" class="external"/>
+    <text x="45" y="68" class="legend-text">External/ALB</text>
+    
+    <rect x="10" y="85" width="30" height="20" rx="3" class="service"/>
+    <text x="45" y="98" class="legend-text">NestJS Service</text>
+    
+    <rect x="10" y="115" width="30" height="20" rx="3" class="sidecar"/>
+    <text x="45" y="128" class="legend-text">Dapr Sidecar</text>
+    
+    <rect x="10" y="145" width="30" height="20" rx="3" class="monitoring"/>
+    <text x="45" y="158" class="legend-text">Monitoring</text>
+    
+    <!-- Arrow Types -->
+    <text x="10" y="190" class="legend-title" style="font-size: 11px;">Connections:</text>
+    
+    <line x1="10" y1="205" x2="40" y2="205" class="arrow" marker-end="url(#arrowhead)"/>
+    <text x="45" y="208" class="legend-text">Direct comm.</text>
+    
+    <line x1="10" y1="225" x2="40" y2="225" class="arrow-dashed" marker-end="url(#arrowhead-dashed)"/>
+    <text x="45" y="228" class="legend-text">Monitoring</text>
+    
+    <!-- Environment Boundaries -->
+    <text x="10" y="255" class="legend-title" style="font-size: 11px;">Environments:</text>
+    
+    <rect x="10" y="265" width="30" height="15" rx="2" fill="#fff8e1" stroke="#ff9800" stroke-width="1" opacity="0.5"/>
+    <text x="45" y="276" class="legend-text">AWS Cloud</text>
+    
+    <rect x="10" y="285" width="30" height="15" rx="2" fill="#f0f7ff" stroke="#1976d2" stroke-width="1" opacity="0.5"/>
+    <text x="45" y="296" class="legend-text">Kubernetes</text>
+  </g>
+</svg>

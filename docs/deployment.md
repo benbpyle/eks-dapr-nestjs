@@ -89,7 +89,7 @@ helm install datadog-operator datadog/datadog-operator -n datadog-operator
 ```
 
 **Configuration**: `kubernetes/datadog/`
-- `datadog-secret.yaml`: API key (f005b932c81376b5218e16f7f404ce80)
+- `datadog-secret.yaml`: API key 
 - `datadog-agent.yaml`: Agent configuration with OTLP receiver
 
 **Features Enabled**:

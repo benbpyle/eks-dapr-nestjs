@@ -27,7 +27,7 @@ This file contains configuration and commands for Claude Code to help with devel
 │   ├── namespaces/
 │   │   └── dapr-services-namespace.yaml
 │   ├── datadog/
-│   │   ├── datadog-secret.yaml     # API key: f005b932c81376b5218e16f7f404ce80
+│   │   ├── datadog-secret.yaml     # API key: 
 │   │   └── datadog-agent.yaml      # Datadog operator config
 │   ├── dapr/
 │   │   ├── dapr-operator.yaml      # Dapr installation

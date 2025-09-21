@@ -22,16 +22,14 @@ This file contains configuration and commands for Claude Code to help with devel
 .
 ├── CLAUDE.md
 ├── kubernetes/
-│   ├── eksctl-config.yaml          # Full EKS cluster config
-│   ├── cluster-config.yaml         # Simple cluster config
+│   ├── cluster-config.yaml         # EKS cluster config
 │   ├── namespaces/
 │   │   └── dapr-services-namespace.yaml
 │   ├── datadog/
-│   │   ├── datadog-secret.yaml     # API key: 
 │   │   └── datadog-agent.yaml      # Datadog operator config
 │   ├── dapr/
 │   │   ├── dapr-operator.yaml      # Dapr installation
-│   │   └── tracing-config.yaml     # Dapr tracing to Datadog
+│   │   └── dapr-config.yaml        # Dapr tracing to Datadog
 │   ├── services/
 │   │   ├── comms-service.yaml      # NestJS comms service deployment
 │   │   └── greeter-service.yaml    # NestJS greeter service deployment
@@ -67,10 +65,8 @@ This file contains configuration and commands for Claude Code to help with devel
 
 ### 1. Create EKS Cluster
 ```bash
-# Create cluster (choose one config)
+# Create cluster
 eksctl create cluster -f kubernetes/cluster-config.yaml
-# OR with full config
-eksctl create cluster -f kubernetes/eksctl-config.yaml
 ```
 
 ### 2. Install Datadog Operator
@@ -81,27 +77,46 @@ helm repo update
 kubectl create namespace datadog-operator
 helm install datadog-operator datadog/datadog-operator -n datadog-operator
 
-# Apply Datadog secret and agent
-kubectl apply -f kubernetes/datadog/datadog-secret.yaml
+# Create Datadog secret from environment variable and apply agent
+export DATADOG_API_KEY='your-datadog-api-key-here'
+kubectl create secret generic datadog-secret \
+    --from-literal=api-key="$DATADOG_API_KEY" \
+    -n datadog-operator \
+    --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f kubernetes/datadog/datadog-agent.yaml
 ```
 
-### 3. Install Dapr
+### 3. Associate OIDC Provider (Required for IAM Service Accounts)
+```bash
+# Associate IAM OIDC provider for service accounts
+eksctl utils associate-iam-oidc-provider --region=us-west-2 --cluster=dapr-demo --approve
+```
+
+### 4. Install EBS CSI Driver (Required for Dapr)
+```bash
+# Install EBS CSI driver addon
+eksctl create addon --cluster dapr-demo --name aws-ebs-csi-driver --region us-west-2
+
+# Set gp2 as default StorageClass
+kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+### 5. Install Dapr
 ```bash
 # Install Dapr CLI (if not installed)
 curl -fsSL https://raw.githubusercontent.com/dapr/cli/master/install/install.sh | /bin/bash
 
 # Initialize Dapr on cluster
 dapr init -k
-
-# Apply Dapr configuration
-kubectl apply -f kubernetes/dapr/tracing-config.yaml
 ```
 
-### 4. Deploy Services
+### 6. Deploy Services
 ```bash
 # Create namespace
 kubectl apply -f kubernetes/namespaces/dapr-services-namespace.yaml
+
+# Apply Dapr configuration BEFORE deploying services
+kubectl apply -f kubernetes/dapr/dapr-config.yaml
 
 # Deploy services (ensure images are pushed to ECR first)
 kubectl apply -f kubernetes/services/greeter-service.yaml
@@ -111,17 +126,32 @@ kubectl apply -f kubernetes/services/comms-service.yaml
 kubectl apply -f kubernetes/ingress/ingress.yaml
 ```
 
-### 5. Build and Push Docker Images
+## Troubleshooting
+
+### Distributed Tracing Issues
+If traces aren't appearing in Datadog, verify the Dapr configuration uses the correct endpoint:
+```bash
+kubectl get configuration dapr-config -n dapr-services -o yaml
+```
+
+The OTLP endpoint should be:
+```yaml
+endpointAddress: "datadog-agent.datadog-operator.svc.cluster.local:4318"
+```
+
+Not: `$(HOST_IP):4318` (environment variables don't work in Configuration resources)
+
+### 7. Build and Push Docker Images
 ```bash
 # Build and push NestJS comms service
 cd services/comms
-docker build -t public.ecr.aws/f8u4w2p3/node/comms:latest .
-docker push public.ecr.aws/f8u4w2p3/node/comms:latest
+docker build -t public.ecr.aws/f8u4w2p3/node/comms:v3 .
+docker push public.ecr.aws/f8u4w2p3/node/comms:v3
 
 # Build and push NestJS greeter service
 cd ../greeter
-docker build -t public.ecr.aws/f8u4w2p3/node/greeter:latest .
-docker push public.ecr.aws/f8u4w2p3/node/greeter:latest
+docker build -t public.ecr.aws/f8u4w2p3/node/greeter:v3 .
+docker push public.ecr.aws/f8u4w2p3/node/greeter:v3
 ```
 
 ## Development Commands

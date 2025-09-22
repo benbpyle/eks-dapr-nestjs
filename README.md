@@ -1,6 +1,17 @@
 # Kubernetes + Dapr + Datadog Showcase
 
-A demonstration project showcasing microservices architecture using Dapr on Kubernetes with comprehensive observability through Datadog. This project features two NestJS services communicating via Dapr's service-to-service invocation, complete with distributed tracing.
+A comprehensive demonstration project showcasing production-ready microservices architecture using Dapr on Kubernetes with enterprise-grade observability through Datadog. This project features two NestJS services communicating via Dapr's service-to-service invocation, complete with distributed tracing and OpenTelemetry integration.
+
+## 📖 Supporting Blog Article
+
+This repository supports the comprehensive tutorial: **["Master Distributed Microservices: Ultimate Guide to Dapr, Kubernetes, and OpenTelemetry Tracing"](https://binaryheap.com/dapr-microservices-observability/)**
+
+The blog article provides detailed explanations of:
+- Complete EKS cluster setup and configuration
+- Dapr installation and distributed tracing implementation  
+- Datadog observability integration with OpenTelemetry
+- Step-by-step microservices deployment walkthrough
+- Real-world observability examples and performance analysis
 
 ## 🏗️ Architecture
 
@@ -286,16 +297,6 @@ kubectl delete pods -n datadog-operator -l app.kubernetes.io/name=datadog-agent-
 - **Vertical**: ARM Graviton2 instances for better price/performance
 - **Dapr Overhead**: ~1-2ms per service invocation
 
-## 📝 Blog Article Topics
-
-This project demonstrates several key concepts for technical content:
-
-1. **Microservices with NestJS**: TypeScript-first microservices architecture
-2. **Dapr Service Invocation**: Simplified service-to-service communication
-3. **OpenTelemetry Integration**: Distributed tracing in Node.js applications
-4. **Kubernetes on ARM**: Graviton2 instances for cost optimization
-5. **Datadog Observability**: Full-stack monitoring with OTLP
-6. **DevOps Automation**: Infrastructure as Code with eksctl and Helm
 
 ## 🔄 Deployment & Cleanup
 
